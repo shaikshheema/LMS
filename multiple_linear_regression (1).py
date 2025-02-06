@@ -132,5 +132,53 @@ model1 = smf.ols('MPG~WT+VOL+SP+HP', data=cars).fit()
 
 model1.summary()
 
-"""****R-Squared values tells about how much of variability in y is explained by X.****"""
+"""****R-Squared values tells about how much of variability in y is explained by X.****
+
+OBSERVATIONS:
+- The R-squared and adjusted R-Squared values are good and about 75% of variability in y is explained by X columns
+- The probability value with respect to f-statistic is close to zero, indicating that all or some of x columns are significant
+- The p-values for VOL and WT are higher that 5% indicating some interaction issue among themselves,  which need to be further explored
+
+PERFORMANCE METRICS FOR MODEL1
+"""
+
+#fIND THE PERFORMNACE METRICS
+#CREATE A DATA FRAME WITH ACTUAL Y AND PREDICTED Y COLUMNS
+
+df1 = pd.DataFrame()
+df1["actual_y1"]=cars["MPG"]
+df1.head()
+
+#predict for the given X data columns
+pred_y1=model1.predict(cars.iloc[:,0:4])
+df1["pred_y1"] = pred_y1
+df1.head()
+
+#compute the mean squared error(MSE) for model
+from sklearn.metrics import mean_squared_error
+mse = mean_squared_error(df1["actual_y1"], df1["pred_y1"])
+print("MSE :", mse)
+print("RMSE :", np.sqrt(mse))
+
+"""Checking for multicollinearity among X-columns using VIF method"""
+
+cars.head()
+
+# Compute VIF values
+rsq_hp = smf.ols('HP~WT+VOL+SP',data=cars).fit().rsquared
+vif_hp = 1/(1-rsq_hp)
+
+rsq_wt = smf.ols('WT~HP+VOL+SP',data=cars).fit().rsquared
+vif_wt = 1/(1-rsq_wt)
+
+rsq_vol = smf.ols('VOL~WT+SP+HP',data=cars).fit().rsquared
+vif_vol = 1/(1-rsq_vol)
+
+rsq_sp = smf.ols('SP~WT+VOL+HP',data=cars).fit().rsquared
+vif_sp = 1/(1-rsq_sp)
+
+# Storing vif values in a data frame
+d1 = {'Variables':['Hp','WT','VOL','SP'],'VIF':[vif_hp,vif_wt,vif_vol,vif_sp]}
+Vif_frame = pd.DataFrame(d1)
+Vif_frame
 
